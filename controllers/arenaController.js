@@ -1,6 +1,6 @@
 const pokeLeagueArena = require('../src/pokeLeagueArena.js');
 const arena = require('../src/arenaSimulator.js');
-const test = require('../src/test.js');
+//const test = require('../src/test.js');
 
 /* exports.simulateGet = function(req, res) {
     //resultados de prueba - Caso básico
