@@ -16,8 +16,6 @@ class PokeLeagueArena {
     simulate() {
         console.log('pokeLeagueArena.simulate()');
         if(this.getStandings()){
-            console.log(this.battleResults.length);
-            console.log(this.finalStandings.length);
             return this.getMinimumMovements();
         }else {
             return 'Some Pokemon were not found or there are repeated Pokemon.';
@@ -30,7 +28,6 @@ class PokeLeagueArena {
     //o se encuentra que no es valido el array de entrada
     getMinimumMovements() {
         //clonamos el array inicial
-        console.log('getMinimumMovements');
         let currentState = [...this.initialStandings];
 
         //iteramos mientras los arrays no sean iguales y mientras se invalide el ejercicio
@@ -54,8 +51,6 @@ class PokeLeagueArena {
             }
 
         }
-        //console.log(this.challengesByPokemon);
-        console.log(this.stateHistory.length);
         
         if (this.invalidChallenges == false) {
             const movementsByPokemon = Object.values(this.challengesByPokemon);
@@ -121,22 +116,12 @@ class PokeLeagueArena {
         this.saveStatesHistory(currentState);
         let currentPosition = currentPos;
 
-        //console.log(currentState[currentPos]);
-        //console.log('current:' + currentPos);
-        //console.log('final:' + finalPos);
-
-
         //obtener los movimientos que tiene el pokemon (pueden ser undefined,1 o 2)
         let pkmnRemainingChallenges = this.challengesByPokemon[currentState[currentPos]];
-        //console.log('challs:' + pkmnRemainingChallenges);
-        //verificar cuantos retos le quedan al pokemon
-        //if (pkmnRemainingChallenges === undefined || pkmnRemainingChallenges == 1) {
         //cuantas posiciones se va a mover
         let positionsToClimb = currentPos - finalPos;
-        console.log('postoclimb:' + positionsToClimb);
         //si solo se debe mover 1
         if (positionsToClimb == 1) {
-            //PODRIA DARSE EL CASO QUE EL TARGET TENGA SU POSICION FINAL???
             //verificar si con el q va a retar esta en su pos final, no dejar cambiarlo si es asi
             if (currentPos - 1 != this.finalStandings.indexOf(currentState[currentPosition - 1])) {
                 this.climbLadder(currentState, currentPosition, currentPosition - 1);
