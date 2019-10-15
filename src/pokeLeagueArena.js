@@ -3,7 +3,7 @@ const services = require('./services.js');
 //const fs = require('fs');
 
 class PokeLeagueArena {
-    constructor(battleResults,pokedex) {
+    constructor(battleResults, pokedex) {
         this.pokedex = pokedex;
         this.battleResults = battleResults;
         this.invalidChallenges = false;
@@ -15,8 +15,14 @@ class PokeLeagueArena {
 
     simulate() {
         console.log('pokeLeagueArena.simulate()');
-        this.getStandings();
-        return this.getMinimumMovements();
+        if(this.getStandings()){
+            console.log(this.battleResults.length);
+            console.log(this.finalStandings.length);
+            return this.getMinimumMovements();
+        }else {
+            return 'Some Pokemon were not found or there are repeated Pokemon.';
+        }
+
 
     }
 
@@ -42,11 +48,15 @@ class PokeLeagueArena {
                 }
                 //console.log('currentpos:'+currentPos);
 
-                //this.invalidChallenges = true;
+                if (this.invalidChallenges) {
+                    break;
+                }
             }
 
         }
-        console.log(this.challengesByPokemon);
+        //console.log(this.challengesByPokemon);
+        console.log(this.stateHistory.length);
+        
         if (this.invalidChallenges == false) {
             const movementsByPokemon = Object.values(this.challengesByPokemon);
             let minimumMovs = 0;
@@ -56,7 +66,7 @@ class PokeLeagueArena {
             }
             return minimumMovs;
         } else {
-            return 'Too chaotic';
+            return 'The Team Rocket has done again..the results are corrupted!';
         }
 
     }
@@ -68,6 +78,7 @@ class PokeLeagueArena {
         let formatedFinalStandings = [...this.battleResults];
         let initialStandings = new Array();
         let finalStandings = new Array();
+        let allPokemonsFound = true;
 
         //crear un array de solo nombres de pokemon, el indice +1 es el numero de pokedex
         for (var j in this.pokedex) {
@@ -82,18 +93,26 @@ class PokeLeagueArena {
             let index = formatedFinalStandings.indexOf(pokedexArray[i]);
             if (index != -1) {
                 initialStandings.push(i + 1);
-            }
+            } 
         }
         //crear array final  por número de pokedex
         for (var i = 0; i < formatedFinalStandings.length; i++) {
             let index = pokedexArray.indexOf(formatedFinalStandings[i]);
             if (index != -1) {
                 finalStandings.push(index + 1);
+            } else{
+                allPokemonsFound = false;
+                break;
             }
         }
-        this.finalStandings = finalStandings;
-        this.initialStandings = initialStandings;
-        console.log([this.initialStandings, this.finalStandings]);
+        if (allPokemonsFound){
+            this.finalStandings = finalStandings;
+            this.initialStandings = initialStandings;
+            console.log([this.initialStandings, this.finalStandings]);
+            return allPokemonsFound;
+        }else{
+            return allPokemonsFound;
+        }
     }
 
     //Método que se encarga de mover el pokemon a su posición final y validar 
@@ -102,86 +121,77 @@ class PokeLeagueArena {
         this.saveStatesHistory(currentState);
         let currentPosition = currentPos;
 
-        console.log(currentState[currentPos]);
-        console.log('current:' + currentPos);
-        console.log('final:' + finalPos);
+        //console.log(currentState[currentPos]);
+        //console.log('current:' + currentPos);
+        //console.log('final:' + finalPos);
 
 
-        //obtener los movimientos que tiene el pokemon (pueden ser null,1 o 2)
+        //obtener los movimientos que tiene el pokemon (pueden ser undefined,1 o 2)
         let pkmnRemainingChallenges = this.challengesByPokemon[currentState[currentPos]];
-        console.log('challs:'+pkmnRemainingChallenges);
+        //console.log('challs:' + pkmnRemainingChallenges);
         //verificar cuantos retos le quedan al pokemon
-        if (pkmnRemainingChallenges === undefined || pkmnRemainingChallenges == 1) {
-            //cuantas posiciones se va a mover
-            let positionsToClimb = currentPos - finalPos;
-            console.log('postoclimb:'+positionsToClimb);
-            //si solo se debe mover 1
-            if (positionsToClimb == 1) {
-                //PODRIA DARSE EL CASO QUE EL TARGET TENGA SU POSICION FINAL???
-                //verificar si con el q va a retar esta en su pos final, no dejar cambiarlo si es asi
-                if (currentPos - 1 != this.finalStandings.indexOf(currentState[rivalsPositions[0]])) {
-                    this.climbLadder(currentState, currentPos, finalPos);
-                }
-            }
-            //si se debe mover 2 
-            else if (positionsToClimb == 2) {
-                // si voy a subir 2, tengo que verificar que el pokemon del medio no este en la pos final
-                //si esta debo sumarle un movimiento para q pueda permanecer
-                let rivalsPositions = [currentPos - 1, currentPos - 2];
-                if (rivalsPositions[0] == this.finalStandings.indexOf(currentState[rivalsPositions[0]])) {
-                    //el primer rival vence al segundo y suma un movimiento
-                    //con el objetivo de q quede en el mismo lugar
-                    this.climbLadder(currentState, rivalsPositions[0], rivalsPositions[1]);
-                    // se reta el primero
-                    this.climbLadder(currentState, currentPosition, rivalsPositions[0]);
-                    //actualiza posición actual
-                    currentPosition = currentPosition - 1;
-                    //se elimina un rival
-                    rivalsPositions.splice(0, 1);
-                    //se vence el segundo rival
-                    this.climbLadder(currentState, currentPosition, rivalsPositions[0]);
-                } else {
-                    //los dos rivales van a bajar
-                    // se reta el primero
-                    this.climbLadder(currentState, currentPosition, rivalsPositions[0]);
-                    //actualiza posición actual
-                    currentPosition = currentPosition - 1;
-                    //se elimina un rival
-                    rivalsPositions.splice(0, 1);
-                    //se vence el segundo rival
-                    this.climbLadder(currentState, currentPosition, rivalsPositions[0]);
-                }
-  /*               //aumenta los movimientos del pokemon que se mueve
-                this.increaseChallenges(currentState[currentPos]);
-                //mueve el pokemon de posición (solo sube)
-                this.array_move(currentState, currentPos, finalPos); */
-            }
-            else {
-                //no puede ser mayor a 2
-                this.invalidChallenges = true;
+        //if (pkmnRemainingChallenges === undefined || pkmnRemainingChallenges == 1) {
+        //cuantas posiciones se va a mover
+        let positionsToClimb = currentPos - finalPos;
+        console.log('postoclimb:' + positionsToClimb);
+        //si solo se debe mover 1
+        if (positionsToClimb == 1) {
+            //PODRIA DARSE EL CASO QUE EL TARGET TENGA SU POSICION FINAL???
+            //verificar si con el q va a retar esta en su pos final, no dejar cambiarlo si es asi
+            if (currentPos - 1 != this.finalStandings.indexOf(currentState[currentPosition - 1])) {
+                this.climbLadder(currentState, currentPosition, currentPosition - 1);
             }
         }
-        //tiene 2 movimientos y no puede retar mas
-        else {
-            //tiene 2 movimientos, no puede subir mas, muy caotico
-            this.increaseChallenges(currentState[currentPos]);
+        //si se debe mover 2 
+        else if (positionsToClimb == 2) {
+            // si voy a subir 2, tengo que verificar que el pokemon del medio no este en la pos final
+            //si esta debo sumarle un movimiento para q pueda permanecer
+            if (currentPosition - 1 == this.finalStandings.indexOf(currentState[currentPosition - 1])) {
+                //el primer rival vence al segundo y suma un movimiento
+                //con el objetivo de q quede en el mismo lugar
+                this.climbLadder(currentState, currentPosition - 1, currentPosition - 2);
+                // se reta el primero
+                this.climbLadder(currentState, currentPosition, currentPosition - 1);
+                //actualiza posición actual
+                currentPosition = currentPosition - 1;
+                //se vence el segundo rival
+                this.climbLadder(currentState, currentPosition, currentPosition - 1);
+            } else {
+                //los dos rivales van a bajar
+                // se reta el primero
+                this.climbLadder(currentState, currentPosition, currentPosition - 1);
+                //actualiza posición actual
+                currentPosition = currentPosition - 1;
+                //se vence el segundo rival
+                this.climbLadder(currentState, currentPosition, currentPosition - 1);
+            }
         }
-        console.log(currentState);
+        else if (positionsToClimb > 2) {
+            this.climbLadder(currentState, currentPosition, currentPosition - positionsToClimb);
+
+        }
+        //console.log(currentState);
     }
 
     //Método que realiza el movimiento y suma los movimientos al pokemon
     climbLadder(currentStandings, initialPos, finalPos) {
         //mueve el pokemon de posición (solo sube)
-        this.array_move(currentStandings, initialPos, finalPos);
         //aumenta movimientos del pokemon
-        this.increaseChallenges(currentStandings[initialPos]);
+        let positionsToClimb = Math.abs(finalPos - initialPos);
+        this.increaseChallenges(currentStandings[initialPos], positionsToClimb);
+        this.array_move(currentStandings, initialPos, finalPos);
     }
 
     //Método que realiza la suma de movimientos al pokemon
-    increaseChallenges(pokemon) {
+    increaseChallenges(pokemon, positionsToClimb) {
         let pkmChallenges = this.challengesByPokemon[pokemon];
         if (pkmChallenges === undefined) {
-            this.challengesByPokemon[pokemon] = 1;
+            if (positionsToClimb < 3) {
+                this.challengesByPokemon[pokemon] = positionsToClimb;
+            } else {
+                this.challengesByPokemon[pokemon] = positionsToClimb;    
+                this.invalidChallenges = true;    
+            }
         }
         else if (pkmChallenges == 1) {
             this.challengesByPokemon[pokemon] = 2;

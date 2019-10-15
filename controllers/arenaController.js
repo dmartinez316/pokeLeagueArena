@@ -1,27 +1,23 @@
 const pokeLeagueArena = require('../src/pokeLeagueArena.js');
 const arena = require('../src/arenaSimulator.js');
-
+const test = require('../src/test.js');
 
 exports.simulateGet = function(req, res) {
     //resultados de prueba - Caso básico
     let resultados = ["Squirtle", "Bulbasaur", "Charmander", "Caterpie", "Pidgey"];
+    let resultados2 = ["Charmeleon","Weepinbell","Victreebel","Poliwag","Tentacool","Farfetchd","Venusaur","Shellder","Slowpoke"];
+    let resultados3 = ["Charmeleon","Bulbasaur","Ivysaur","Weepinbell","Victreebel","Poliwag","Tentacool","Farfetchd","Venusaur","Shellder","Slowpoke"];
+
+    test.chomposGen();
+
     //let pokeLeague= new pokeLeagueArena(resultados);
     //console.log('controller:'+pokeLeague.battleResults);
-    let answer = arena.arenaSimulator(resultados);
+    let answer = arena.arenaSimulator(resultados3);
     res.send('<p> '+ answer+ ' </p>');
 };
 
 exports.simulatePost = function(req, res) {
-    //resultados de prueba - Caso básico
-    //let resultados = ["Squirtle", "Bulbasaur", "Charmander", "Caterpie", "Pidgey"];
     var results = req.body.results;
-    //console.log(name);
-    let pokeLeague= new pokeLeagueArena(results);
-    let answer = pokeLeague.simulate();
-    res.send('<p> '+ answer+ ' </p>');
-};
-
-
-exports.aboutGet = function(req, res) {
-    res.send('<p> Exercise description </p>');
+    let answer = arena.arenaSimulator(results);
+    res.json({ answer: answer });
 };

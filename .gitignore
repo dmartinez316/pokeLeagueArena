@@ -1,4 +1,3 @@
 ##Ignore jsons con la pokedex
-output2.json
-output3.json
-node-js-getting-started/*
+testCase.json
+src/test.js
