@@ -8,10 +8,7 @@ exports.simulateGet = function(req, res) {
     let resultados2 = ["Charmeleon","Weepinbell","Victreebel","Poliwag","Tentacool","Farfetchd","Venusaur","Shellder","Slowpoke"];
     let resultados3 = ["Charmeleon","Bulbasaur","Ivysaur","Weepinbell","Victreebel","Poliwag","Tentacool","Farfetchd","Venusaur","Shellder","Slowpoke"];
 
-    test.chomposGen();
-
-    //let pokeLeague= new pokeLeagueArena(resultados);
-    //console.log('controller:'+pokeLeague.battleResults);
+    //test.chomposGen();
     let answer = arena.arenaSimulator(resultados3);
     res.send('<p> '+ answer+ ' </p>');
 };

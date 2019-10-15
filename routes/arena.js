@@ -5,7 +5,7 @@ var arenaController = require('../controllers/arenaController.js');
 
 
 //post simulate
-router.get('/simulateGet', arenaController.simulateGet);
+//router.get('/simulateGet', arenaController.simulateGet);
 //post simulate
 router.post('/simulate', arenaController.simulatePost);
   
