@@ -3,11 +3,11 @@ var router = express.Router();
 
 var arenaController = require('../controllers/arenaController.js');
 
+//Crear casos de prueba en el servidor
+//router.get('/generateTest', arenaController.generateTest);
 
-//post simulate
-//router.get('/simulateGet', arenaController.simulateGet);
-//post simulate
-router.post('/simulate', arenaController.simulatePost);
-  
+
+//Enrutamiento a la url que contiene el método para resolver el ejercicio
+router.post('/simulate', arenaController.simulatePost);  
 
 module.exports = router;

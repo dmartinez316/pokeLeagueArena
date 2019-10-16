@@ -1,3 +1,5 @@
 ##Ignore jsons con la pokedex
 testCase.json
 src/test.js
+pokedexFull.json
+pokedexFullHD.json

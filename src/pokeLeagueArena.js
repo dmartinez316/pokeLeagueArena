@@ -1,7 +1,19 @@
-const services = require('./services.js');
+/*Clase que implementa la lógica para resolver el ejercicio
+El método de entrada es simulate() el cual devuelve la respuesta para el ejercicio.
 
-//const fs = require('fs');
+Constructora
+    battleResults: resultados enviados por el usuario, es un array con los nombres de pokemones
+    pokedex: contiene un objeto con el resultado de la llamada al API de pokeapi.co
 
+Properties
+        pokedex: variable local para almacenar la pokedex.
+        battleResults: variable local para almacenar los resultados finales.
+        invalidChallenges: indica que un pokemon intento realizar una batalla no permitida.
+        challengesByPokemon: objeto que almacena los movimientos de cada pokemon. Al final se suma.
+        initialStandings: array que contiene los números nacionales de los pokemon ordenados.
+        finalStandings: array que contiene los números nacionales en el orden del resultado final. 
+        pokeError: error que ocurrio en la ejecución, se envía como respuesta.
+*/
 class PokeLeagueArena {
     constructor(battleResults, pokedex) {
         this.pokedex = pokedex;
@@ -10,17 +22,16 @@ class PokeLeagueArena {
         this.challengesByPokemon = {};
         this.initialStandings = [];
         this.finalStandings = [];
-        this.stateHistory = [];
+        this.pokeError = '';
     }
-
+    //Método de entrada que inicializa las propiedades y llama al método que resuelve el problema
     simulate() {
         console.log('pokeLeagueArena.simulate()');
-        if(this.getStandings()){
+        if (this.getStandings()) {
             return this.getMinimumMovements();
-        }else {
-            return 'Some Pokemon were not found or there are repeated Pokemon.';
+        } else {
+            return 'Something happened with the sent result.' + this.pokeError;
         }
-
 
     }
 
@@ -51,7 +62,7 @@ class PokeLeagueArena {
             }
 
         }
-        
+
         if (this.invalidChallenges == false) {
             const movementsByPokemon = Object.values(this.challengesByPokemon);
             let minimumMovs = 0;
@@ -81,31 +92,38 @@ class PokeLeagueArena {
         }
         //quitar uppercase a resultados
         for (var i = 0; i < formatedFinalStandings.length; i++) {
-            formatedFinalStandings[i] = formatedFinalStandings[i].toLowerCase();
+            if (formatedFinalStandings[i] != null) {
+                formatedFinalStandings[i] = formatedFinalStandings[i].toLowerCase();
+            }
         }
         //crear array inicial ordernado por número de pokedex
         for (var i = 0; i < pokedexArray.length; i++) {
             let index = formatedFinalStandings.indexOf(pokedexArray[i]);
             if (index != -1) {
                 initialStandings.push(i + 1);
-            } 
+            }
         }
         //crear array final  por número de pokedex
         for (var i = 0; i < formatedFinalStandings.length; i++) {
             let index = pokedexArray.indexOf(formatedFinalStandings[i]);
             if (index != -1) {
                 finalStandings.push(index + 1);
-            } else{
-                allPokemonsFound = false;
-                break;
+            } else {
+                if (this.pokeError === '') {
+                    this.pokeError = 'This pokemon(s) could not be found:' + formatedFinalStandings[i] + ',';
+                } else {
+                    this.pokeError = this.pokeError + ' ' + formatedFinalStandings[i] + ',';
+                }
             }
         }
-        if (allPokemonsFound){
+        if (allPokemonsFound && this.pokeError === '') {
             this.finalStandings = finalStandings;
             this.initialStandings = initialStandings;
-            console.log([this.initialStandings, this.finalStandings]);
+            //console.log([this.initialStandings, this.finalStandings]);
             return allPokemonsFound;
-        }else{
+        } else {
+            this.pokeError = this.pokeError.replace(/.$/, ".");
+            allPokemonsFound = false;
             return allPokemonsFound;
         }
     }
@@ -113,7 +131,6 @@ class PokeLeagueArena {
     //Método que se encarga de mover el pokemon a su posición final y validar 
     //si puede o no moverse ahi 
     battleToPosition(currentState, currentPos, finalPos) {
-        this.saveStatesHistory(currentState);
         let currentPosition = currentPos;
 
         //obtener los movimientos que tiene el pokemon (pueden ser undefined,1 o 2)
@@ -174,8 +191,8 @@ class PokeLeagueArena {
             if (positionsToClimb < 3) {
                 this.challengesByPokemon[pokemon] = positionsToClimb;
             } else {
-                this.challengesByPokemon[pokemon] = positionsToClimb;    
-                this.invalidChallenges = true;    
+                this.challengesByPokemon[pokemon] = positionsToClimb;
+                this.invalidChallenges = true;
             }
         }
         else if (pkmChallenges == 1) {
@@ -185,11 +202,6 @@ class PokeLeagueArena {
             this.challengesByPokemon[pokemon] = 3;
             this.invalidChallenges = true;
         }
-    }
-
-    //Método que guarda el historial de estados 
-    saveStatesHistory(currentState) {
-        this.stateHistory.push(currentState);
     }
 
     //Método que mueve un elemento dado una posición inicial y una final
